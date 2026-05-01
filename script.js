@@ -252,6 +252,36 @@ const projectsState = {
 	sort: "updated",
 };
 
+function setupProjectListeners(repos) {
+	const searchInput = document.getElementById("project-search");
+	const langFilter = document.getElementById("lang-filter");
+	const sortSelect = document.getElementById("sort-select");
+	const filterBtns = document.querySelectorAll(".filter-btn");
+
+	// Helper to run all filters and re-render
+	const updateGallery = () => {
+		const searchTerm = searchInput ? searchInput.value : "";
+		const langTerm = langFilter ? langFilter.value : "";
+		const sortTerm = sortSelect ? sortSelect.value : "updated";
+		const activeBtn = document.querySelector(".filter-btn.active");
+		const filterTerm = activeBtn ? activeBtn.dataset.filter : "all";
+
+		renderProjects(repos, filterTerm, searchTerm, langTerm, sortTerm);
+	};
+
+	if (searchInput) searchInput.addEventListener("input", updateGallery);
+	if (langFilter) langFilter.addEventListener("change", updateGallery);
+	if (sortSelect) sortSelect.addEventListener("change", updateGallery);
+
+	filterBtns.forEach((btn) => {
+		btn.addEventListener("click", () => {
+			filterBtns.forEach((b) => b.classList.remove("active"));
+			btn.classList.add("active");
+			updateGallery();
+		});
+	});
+}
+
 async function initProjects() {
 	const grid = document.getElementById("projects-grid");
 	if (!grid) return;
