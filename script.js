@@ -117,7 +117,7 @@ async function loadPage(page) {
 		home: initHome,
 		about: null,
 		projects: initProjects,
-		contact: initContact,
+		contact: null,
 	};
 	if (inits[page]) inits[page]();
 }
@@ -252,32 +252,42 @@ const projectsState = {
 	sort: "updated",
 };
 
-function setupProjectListeners(repos) {
+function setupProjectListeners() {
 	const searchInput = document.getElementById("project-search");
 	const langFilter = document.getElementById("lang-filter");
 	const sortSelect = document.getElementById("sort-select");
 	const filterBtns = document.querySelectorAll(".filter-btn");
 
-	// Helper to run all filters and re-render
-	const updateGallery = () => {
-		const searchTerm = searchInput ? searchInput.value : "";
-		const langTerm = langFilter ? langFilter.value : "";
-		const sortTerm = sortSelect ? sortSelect.value : "updated";
-		const activeBtn = document.querySelector(".filter-btn.active");
-		const filterTerm = activeBtn ? activeBtn.dataset.filter : "all";
+	if (searchInput) {
+		searchInput.addEventListener(
+			"input",
+			debounce(() => {
+				projectsState.search = searchInput.value.toLowerCase().trim();
+				renderProjects();
+			}, 250),
+		);
+	}
 
-		renderProjects(repos, filterTerm, searchTerm, langTerm, sortTerm);
-	};
+	if (langFilter) {
+		langFilter.addEventListener("change", () => {
+			projectsState.lang = langFilter.value;
+			renderProjects();
+		});
+	}
 
-	if (searchInput) searchInput.addEventListener("input", updateGallery);
-	if (langFilter) langFilter.addEventListener("change", updateGallery);
-	if (sortSelect) sortSelect.addEventListener("change", updateGallery);
+	if (sortSelect) {
+		sortSelect.addEventListener("change", () => {
+			projectsState.sort = sortSelect.value;
+			renderProjects();
+		});
+	}
 
 	filterBtns.forEach((btn) => {
 		btn.addEventListener("click", () => {
 			filterBtns.forEach((b) => b.classList.remove("active"));
 			btn.classList.add("active");
-			updateGallery();
+			projectsState.filter = btn.dataset.filter;
+			renderProjects();
 		});
 	});
 }
@@ -287,36 +297,36 @@ async function initProjects() {
 	if (!grid) return;
 
 	try {
-		// Fetch all public repos
-		const repos = await ghFetch(`${GH_API}/repos?per_page=100&sort=updated`);
+		// Use cached repos if available
+		if (!_ghRepos) {
+			_ghRepos = await ghFetch(`${GH_API}/repos?per_page=100&sort=updated`);
+		}
 
 		// Filter out excluded repos
-		const filteredRepos = repos.filter(
+		const filteredRepos = _ghRepos.filter(
 			(repo) => !CONFIG.excludeRepos.includes(repo.name),
 		);
 
-		// NEW: Fetch all languages for all filtered repos in parallel
-		await Promise.all(
-			filteredRepos.map(async (repo) => {
-				try {
-					const langData = await ghFetch(repo.languages_url);
-					// Attach the full list of languages to the repo object
-					repo.all_languages = Object.keys(langData);
-				} catch (err) {
-					console.error(`Could not fetch languages for ${repo.name}`, err);
-					repo.all_languages = repo.language ? [repo.language] : [];
-				}
-			}),
-		);
+		// Use only the primary language GitHub already returns — no extra API calls
+		filteredRepos.forEach((repo) => {
+			repo.all_languages = repo.language ? [repo.language] : [];
+		});
 
-		// Populate the filter using the new multi-language data
-		populateLangFilter(filteredRepos);
+		// Fetch READMEs to resolve SHOWCASE flags (batched to respect rate limits)
+		const withShowcase = await resolveShowcaseFlags(filteredRepos);
 
-		// Initial render (showcase by default)
-		renderProjects(filteredRepos, "showcase");
+		// Store in shared state so renderProjects() can read it
+		projectsState.repos = withShowcase;
+		projectsState.filter = "showcase";
 
-		// Set up listeners for search, sort, and filter
-		setupProjectListeners(filteredRepos);
+		// Populate language dropdown
+		populateLangFilter(withShowcase);
+
+		// Wire up filter/search/sort listeners
+		setupProjectListeners();
+
+		// Initial render
+		renderProjects();
 	} catch (err) {
 		console.error(err);
 		grid.innerHTML = `<p class="error">Error loading projects: ${err.message}</p>`;
@@ -387,10 +397,9 @@ function renderProjects() {
 
 	let repos = [...projectsState.repos];
 
-	// 1. Updated Showcase Filter
-	// Changed 'isShowcase' to 'is_showcase' to match the fetch logic
+	// 1. Showcase Filter
 	if (projectsState.filter === "showcase") {
-		repos = repos.filter((r) => r.is_showcase);
+		repos = repos.filter((r) => r.isShowcase);
 	}
 
 	// 2. Apply search
@@ -498,60 +507,7 @@ function escapeAttr(str) {
 /* ─────────────────────────────────────────
    8. PAGE: Contact
 ───────────────────────────────────────── */
-function initContact() {
-	const submitBtn = document.getElementById("cf-submit");
-	const statusEl = document.getElementById("cf-status");
-
-	if (!submitBtn) return;
-
-	submitBtn.addEventListener("click", async () => {
-		const name = document.getElementById("cf-name")?.value.trim();
-		const email = document.getElementById("cf-email")?.value.trim();
-		const message = document.getElementById("cf-message")?.value.trim();
-
-		if (!name || !email || !message) {
-			statusEl.textContent = "Please fill in all fields.";
-			statusEl.className = "cf-status error";
-			return;
-		}
-
-		// Replace the action URL below with your Formspree endpoint
-		// e.g. https://formspree.io/f/YOUR_FORM_ID
-		const FORMSPREE_URL = "https://formspree.io/f/YOUR_FORM_ID";
-
-		submitBtn.disabled = true;
-		submitBtn.textContent = "Sending…";
-		statusEl.textContent = "";
-		statusEl.className = "cf-status";
-
-		try {
-			const res = await fetch(FORMSPREE_URL, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Accept: "application/json",
-				},
-				body: JSON.stringify({ name, email, message }),
-			});
-
-			if (res.ok) {
-				statusEl.textContent = "Message sent! I'll get back to you soon.";
-				statusEl.className = "cf-status success";
-				document.getElementById("cf-name").value = "";
-				document.getElementById("cf-email").value = "";
-				document.getElementById("cf-message").value = "";
-			} else {
-				throw new Error("Server error");
-			}
-		} catch {
-			statusEl.textContent = "Something went wrong. Try emailing me directly.";
-			statusEl.className = "cf-status error";
-		} finally {
-			submitBtn.disabled = false;
-			submitBtn.textContent = "Send Message";
-		}
-	});
-}
+// Contact page is static links only — no JS needed.
 
 /* ─────────────────────────────────────────
    9. README Modal
