@@ -1,0 +1,40 @@
+<section class="projects-section">
+	<div class="projects-header">
+		<h2 class="section-title">Projects</h2>
+		<p class="projects-sub">Click any card to read the full README.</p>
+	</div>
+
+	<!-- Filter / Sort Bar -->
+	<div class="filter-bar">
+		<div class="filter-left">
+			<button class="filter-btn active" data-filter="showcase">
+				★ Showcase
+			</button>
+			<button class="filter-btn" data-filter="all">All Repos</button>
+		</div>
+		<div class="filter-right">
+			<input
+				type="search"
+				id="project-search"
+				class="project-search"
+				placeholder="Search projects…"
+			/>
+			<select id="lang-filter" class="lang-filter">
+				<option value="">All Languages</option>
+			</select>
+			<select id="sort-select" class="sort-select">
+				<option value="updated">Recently Updated</option>
+				<option value="stars">Most Stars</option>
+				<option value="name">Name A–Z</option>
+			</select>
+		</div>
+	</div>
+
+	<!-- Cards Grid -->
+	<div id="projects-grid" class="projects-grid">
+		<div class="projects-loading">
+			<span class="loading-spinner"></span>
+			Fetching repositories…
+		</div>
+	</div>
+</section>

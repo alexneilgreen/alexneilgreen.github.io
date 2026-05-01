@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Alex Neil Green</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body>
+		<!-- ═══ HEADER / NAV ═══ -->
+		<header id="site-header">
+			<div class="header-inner">
+				<a class="logo" href="#" data-page="home">ANG</a>
+				<nav id="main-nav">
+					<a href="#" class="nav-link active" data-page="pages/home">Home</a>
+					<a href="#" class="nav-link" data-page="pages/about">About</a>
+					<a href="#" class="nav-link" data-page="pages/projects">Projects</a>
+					<a href="#" class="nav-link" data-page="pages/contact">Contact</a>
+				</nav>
+				<button class="hamburger" id="hamburger" aria-label="Toggle menu">
+					<span></span><span></span><span></span>
+				</button>
+			</div>
+		</header>
+
+		<!-- ═══ PAGE CONTAINER ═══ -->
+		<main id="page-container">
+			<!-- Pages load here dynamically -->
+		</main>
+
+		<!-- ═══ FOOTER ═══ -->
+		<footer id="site-footer">
+			<div class="footer-inner">
+				<span class="footer-name">Alex Neil Green</span>
+				<span class="footer-sep">·</span>
+				<a
+					href="https://github.com/alexneilgreen"
+					target="_blank"
+					rel="noopener"
+					class="footer-link"
+					>GitHub</a
+				>
+				<span class="footer-sep">·</span>
+				<span class="footer-copy">&copy; <span id="footer-year"></span></span>
+			</div>
+		</footer>
+
+		<!-- ═══ README MODAL ═══ -->
+		<div id="readme-modal" class="modal-overlay" aria-hidden="true">
+			<div class="modal-box">
+				<div class="modal-header">
+					<span id="modal-repo-name"></span>
+					<div class="modal-actions">
+						<a
+							id="modal-repo-link"
+							href="#"
+							target="_blank"
+							rel="noopener"
+							class="modal-gh-link"
+							>View on GitHub ↗</a
+						>
+						<button id="modal-close" class="modal-close" aria-label="Close">
+							&times;
+						</button>
+					</div>
+				</div>
+				<div id="modal-body" class="modal-body">
+					<div class="modal-loading">Loading README…</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- External libs -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+		/>
+
+		<script src="script.js"></script>
+	</body>
+</html>
