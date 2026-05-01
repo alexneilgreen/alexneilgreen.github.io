@@ -3,9 +3,16 @@
 	<div class="about-intro">
 		<h2 class="section-title">About Me</h2>
 		<p class="about-bio">
-			Embedded systems and software engineer with a focus on real-time operating
-			systems, hardware-software integration, and clean, maintainable code. I
-			build things that run close to the metal and hold up in the real world.
+			I'm a Computer Engineering graduate from the University of Central
+			Florida, specializing in Intelligent Systems and Machine Learning. I
+			currently work as a Civilian Engineer for the United States Air Force,
+			developing robust, high-performance solutions that support critical
+			defense initiatives and operational efficiency.
+		</p>
+		<p class="about-bio about-bio--second">
+			My path has taken me from multiple Air Force internships into a full-time
+			engineering role, driven by a focus on systems that perform reliably when
+			it matters most.
 		</p>
 	</div>
 
@@ -13,106 +20,174 @@
 	<div class="about-block">
 		<h3 class="block-title">Skills</h3>
 		<div class="skills-grid">
+			<!-- General -->
 			<div class="skill-group">
-				<h4 class="skill-group-title">Languages</h4>
+				<h4 class="skill-group-title">General</h4>
 				<ul class="skill-list">
-					<li>C / C++</li>
-					<li>Python</li>
-					<li>JavaScript</li>
+					<li>Analytical Skills</li>
+					<li>Interpersonal Skills</li>
+					<li>Computer Engineering</li>
+					<li>Machine Learning</li>
+					<li>Intelligent Systems</li>
+				</ul>
+			</div>
+
+			<!-- Coding Languages -->
+			<div class="skill-group">
+				<h4 class="skill-group-title">Coding Languages</h4>
+				<ul class="skill-list">
+					<li>C (C99)</li>
+					<li>C++ (C14 via CMake)</li>
+					<li>Python 3</li>
+					<li>JavaScript (React 18)</li>
+					<li>SQL (MySQL)</li>
 					<li>HTML / CSS</li>
-					<li>Bash / Shell</li>
+					<li>XML / XACRO / YAML</li>
 				</ul>
 			</div>
 
-			<div class="skill-group">
-				<h4 class="skill-group-title">Embedded &amp; RTOS</h4>
-				<ul class="skill-list">
-					<li>FreeRTOS</li>
-					<li>ESP-IDF / ESP32</li>
-					<li>ARM Cortex-M</li>
-					<li>UART / SPI / I²C</li>
-					<li>Scheduling &amp; Sync Primitives</li>
+			<!-- Software Skills — expandable -->
+			<div class="skill-group skill-group--expandable">
+				<button class="skill-group-header" aria-expanded="false">
+					<h4 class="skill-group-title">Software</h4>
+					<span class="skill-expand-icon">+</span>
+				</button>
+				<ul class="skill-list skill-list--summary">
+					<li>Real-Time &amp; Embedded Systems</li>
+					<li>Robotics &amp; Autonomy</li>
+					<li>Computer Vision &amp; ML</li>
+					<li>Reinforcement Learning</li>
+					<li>Trustworthy ML &amp; Security</li>
+					<li>Full-Stack Development</li>
+					<li>Software Engineering</li>
 				</ul>
+				<div class="skill-detail" aria-hidden="true">
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Real-Time &amp; Embedded Systems</p>
+						<p class="skill-detail-items">
+							FreeRTOS, ESP-IDF, Preemptive Scheduling, ISR-driven
+							synchronization, Mutex/Semaphore implementation, Race Condition
+							Protection
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Robotics &amp; Autonomy</p>
+						<p class="skill-detail-items">
+							ROS2 (Humble), SLAM, NAV2, AMCL Localization, URDF/XACRO modeling,
+							Gazebo Simulation, ros2_control, Twist Multiplexing
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">
+							Computer Vision &amp; Machine Learning
+						</p>
+						<p class="skill-detail-items">
+							YOLOv5/YOLOv8, OpenCV (Blob Detection/CV Bridge), PyTorch
+							(ConvNet), RoboFlow, Mel Spectrogram analysis, CNN-based Image
+							Denoising
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Reinforcement Learning</p>
+						<p class="skill-detail-items">
+							Stable-baselines3, Gymnasium, Proximal Policy Optimization (PPO),
+							Soft Actor-Critic (SAC), Twin Delayed DDPG (TD3), Reward Shaping
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Trustworthy ML &amp; Security</p>
+						<p class="skill-detail-items">
+							FGSM White-Box Attacks, L-infinity threat models, Adversarial
+							Robustness evaluation, RFID verification
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Full-Stack Development</p>
+						<p class="skill-detail-items">
+							React Router v6, REST API integration (Node.js/Express/Axios),
+							MySQL relational schema design, OpenLayers/Google Maps API
+							integration
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Software Engineering</p>
+						<p class="skill-detail-items">
+							Git/GitHub (Submodules), CMake/Colcon Build Systems, npm, Unit
+							Conversion logic, Recursive directory mapping/automation
+						</p>
+					</div>
+				</div>
 			</div>
 
-			<div class="skill-group">
-				<h4 class="skill-group-title">Tools &amp; Platforms</h4>
-				<ul class="skill-list">
-					<li>Git / GitHub</li>
-					<li>VS Code / PlatformIO</li>
-					<li>GDB / OpenOCD</li>
-					<li>Docker</li>
-					<li>Linux</li>
+			<!-- Hardware Skills — expandable -->
+			<div class="skill-group skill-group--expandable">
+				<button class="skill-group-header" aria-expanded="false">
+					<h4 class="skill-group-title">Hardware</h4>
+					<span class="skill-expand-icon">+</span>
+				</button>
+				<ul class="skill-list skill-list--summary">
+					<li>Microcontrollers &amp; Processors</li>
+					<li>PCB Design &amp; Manufacturing</li>
+					<li>Sensors &amp; Actuators</li>
+					<li>Power &amp; Drive Systems</li>
+					<li>Prototyping</li>
 				</ul>
-			</div>
-
-			<div class="skill-group">
-				<h4 class="skill-group-title">Concepts</h4>
-				<ul class="skill-list">
-					<li>Real-Time Systems</li>
-					<li>Data Structures &amp; Algorithms</li>
-					<li>Concurrency &amp; Synchronization</li>
-					<li>Signal Processing</li>
-					<li>ZFS / NAS / Self-Hosting</li>
-				</ul>
+				<div class="skill-detail" aria-hidden="true">
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Microcontrollers &amp; Processors</p>
+						<p class="skill-detail-items">
+							ESP32, Raspberry Pi 4B, ATmega2560, ESP32-S3
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">PCB Design &amp; Manufacturing</p>
+						<p class="skill-detail-items">
+							Multi-revision Power Distribution Boards (PDB), Motor Controller
+							Boards, Altium Designer, EasyEDA, JLCPCB manufacturing
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Sensors &amp; Actuators</p>
+						<p class="skill-detail-items">
+							RPLiDAR A1M8-RG, HC-SR04 Ultrasonic Sensors, RC522 RFID Readers,
+							Raspberry Pi Camera V2, PIR Motion Sensors
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Power &amp; Drive Systems</p>
+						<p class="skill-detail-items">
+							L298N &amp; DRI0041 Motor Drivers, DC Gear Motors, Solenoid Locks,
+							LiFePO4 Battery integration, PWM Motor Control
+						</p>
+					</div>
+					<div class="skill-detail-group">
+						<p class="skill-detail-label">Prototyping</p>
+						<p class="skill-detail-items">
+							Custom PCB wiring, 10-segment LED bar graph interfaces, GPIO
+							circuit design, Breadboarding/Hardware pinning
+						</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Experience -->
+	<!-- Experience & Education -->
 	<div class="about-block">
-		<h3 class="block-title">Experience</h3>
-		<div class="timeline">
-			<div class="timeline-item">
-				<div class="timeline-meta">
-					<span class="timeline-date">20XX – Present</span>
-					<span class="timeline-dot"></span>
-				</div>
-				<div class="timeline-content">
-					<h4 class="timeline-role">Your Role Title</h4>
-					<p class="timeline-org">Company / Organization Name</p>
-					<p class="timeline-desc">
-						Brief description of responsibilities and key accomplishments.
-					</p>
-				</div>
-			</div>
-
-			<div class="timeline-item">
-				<div class="timeline-meta">
-					<span class="timeline-date">20XX – 20XX</span>
-					<span class="timeline-dot"></span>
-				</div>
-				<div class="timeline-content">
-					<h4 class="timeline-role">Previous Role Title</h4>
-					<p class="timeline-org">Company / Organization Name</p>
-					<p class="timeline-desc">
-						Brief description of responsibilities and key accomplishments.
-					</p>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Education -->
-	<div class="about-block">
-		<h3 class="block-title">Education</h3>
-		<div class="timeline">
-			<div class="timeline-item">
-				<div class="timeline-meta">
-					<span class="timeline-date">20XX – 20XX</span>
-					<span class="timeline-dot"></span>
-				</div>
-				<div class="timeline-content">
-					<h4 class="timeline-role">
-						B.S. Computer Engineering <em>(or your degree)</em>
-					</h4>
-					<p class="timeline-org">University Name</p>
-					<p class="timeline-desc">
-						Relevant coursework: Real-Time Operating Systems, Embedded Systems,
-						Data Structures.
-					</p>
-				</div>
-			</div>
+		<h3 class="block-title">Experience &amp; Education</h3>
+		<div class="linkedin-defer">
+			<p class="linkedin-defer-text">
+				For my full work history, education, and certifications, visit my
+				LinkedIn profile.
+			</p>
+			<a
+				class="btn-primary"
+				href="https://www.linkedin.com/in/alex-green-937b501b6/"
+				target="_blank"
+				rel="noopener"
+			>
+				View Full Experience on LinkedIn ↗
+			</a>
 		</div>
 	</div>
 </section>
