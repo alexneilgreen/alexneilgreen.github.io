@@ -93,11 +93,6 @@ body.light-mode {
 	--border-light: #bcbfc4;
 
 	--text-primary: #1a1d23; /* Dark text for readability */
-	/* --text-secondary: #4b5563; */
-
-	/* --accent: #2c5e8c; Darker blue for contrast on white */
-	/* --accent-dim: #1e3f5f; */
-	/* --accent-glow: rgba(44, 94, 140, 0.1); */
 }
 
 /* Optional: Style the toggle button */
