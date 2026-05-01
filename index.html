@@ -3,12 +3,16 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Alex Neil Green</title>
+		<title>Alexander Green Portfolio</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
 			href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap"
 			rel="stylesheet"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
 		/>
 		<link rel="stylesheet" href="styles.css" />
 	</head>
@@ -17,6 +21,14 @@
 		<header id="site-header">
 			<div class="header-inner">
 				<a class="logo" href="#" data-page="home">ANG</a>
+				<button
+					id="theme-toggle"
+					class="nav-link theme-toggle-btn"
+					aria-label="Toggle theme"
+				>
+					<i id="theme-icon" class="fa fa-moon-o"></i>
+					<span id="theme-label">Dark Mode</span>
+				</button>
 				<nav id="main-nav">
 					<a href="#" class="nav-link active" data-page="home">Home</a>
 					<a href="#" class="nav-link" data-page="about">About</a>

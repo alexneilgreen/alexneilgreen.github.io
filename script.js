@@ -142,6 +142,9 @@ window.addEventListener("popstate", (e) => {
    4. Shared Init
 ───────────────────────────────────────── */
 function initShared() {
+	// Initialize Theme Toggle
+	initThemeToggle();
+
 	// Footer year
 	const yearEl = document.getElementById("footer-year");
 	if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -151,6 +154,37 @@ function initShared() {
 	const nav = document.getElementById("main-nav");
 	if (hamburger && nav) {
 		hamburger.addEventListener("click", () => nav.classList.toggle("open"));
+	}
+}
+
+function initThemeToggle() {
+	const toggleBtn = document.getElementById("theme-toggle");
+	const themeIcon = document.getElementById("theme-icon");
+	const themeLabel = document.getElementById("theme-label");
+	const body = document.body;
+
+	function updateUI(isLight) {
+		if (isLight) {
+			body.classList.add("light-mode");
+			themeIcon.className = "fa fa-sun-o"; // Change to sun icon
+			themeLabel.textContent = "Light Mode";
+		} else {
+			body.classList.remove("light-mode");
+			themeIcon.className = "fa fa-moon-o"; // Change back to moon icon
+			themeLabel.textContent = "Dark Mode";
+		}
+	}
+
+	// Check for saved preference
+	const isLight = localStorage.getItem("theme") === "light";
+	updateUI(isLight);
+
+	if (toggleBtn) {
+		toggleBtn.addEventListener("click", () => {
+			const nowLight = !body.classList.contains("light-mode");
+			updateUI(nowLight);
+			localStorage.setItem("theme", nowLight ? "light" : "dark");
+		});
 	}
 }
 
@@ -179,7 +213,8 @@ async function initHome() {
 		const tagline = document.getElementById("hero-tagline");
 		if (tagline)
 			tagline.textContent =
-				user.bio || "Embedded systems engineer & developer.";
+				user.bio ||
+				"Computer Engineer with a focus in Intelligent Systems & Machine Learning.";
 
 		// Stats
 		const visibleRepos = repos.filter(
@@ -218,67 +253,44 @@ const projectsState = {
 };
 
 async function initProjects() {
-	// Wire up controls
-	document.querySelectorAll(".filter-btn").forEach((btn) => {
-		btn.addEventListener("click", () => {
-			document
-				.querySelectorAll(".filter-btn")
-				.forEach((b) => b.classList.remove("active"));
-			btn.classList.add("active");
-			projectsState.filter = btn.dataset.filter;
-			renderProjects();
-		});
-	});
+	const grid = document.getElementById("projects-grid");
+	if (!grid) return;
 
-	const searchInput = document.getElementById("project-search");
-	if (searchInput) {
-		searchInput.addEventListener(
-			"input",
-			debounce((e) => {
-				projectsState.search = e.target.value.toLowerCase().trim();
-				renderProjects();
-			}, 250),
+	try {
+		// Fetch all public repos
+		const repos = await ghFetch(`${GH_API}/repos?per_page=100&sort=updated`);
+
+		// Filter out excluded repos
+		const filteredRepos = repos.filter(
+			(repo) => !CONFIG.excludeRepos.includes(repo.name),
 		);
+
+		// NEW: Fetch all languages for all filtered repos in parallel
+		await Promise.all(
+			filteredRepos.map(async (repo) => {
+				try {
+					const langData = await ghFetch(repo.languages_url);
+					// Attach the full list of languages to the repo object
+					repo.all_languages = Object.keys(langData);
+				} catch (err) {
+					console.error(`Could not fetch languages for ${repo.name}`, err);
+					repo.all_languages = repo.language ? [repo.language] : [];
+				}
+			}),
+		);
+
+		// Populate the filter using the new multi-language data
+		populateLangFilter(filteredRepos);
+
+		// Initial render (showcase by default)
+		renderProjects(filteredRepos, "showcase");
+
+		// Set up listeners for search, sort, and filter
+		setupProjectListeners(filteredRepos);
+	} catch (err) {
+		console.error(err);
+		grid.innerHTML = `<p class="error">Error loading projects: ${err.message}</p>`;
 	}
-
-	const langFilter = document.getElementById("lang-filter");
-	if (langFilter) {
-		langFilter.addEventListener("change", (e) => {
-			projectsState.lang = e.target.value;
-			renderProjects();
-		});
-	}
-
-	const sortSelect = document.getElementById("sort-select");
-	if (sortSelect) {
-		sortSelect.addEventListener("change", (e) => {
-			projectsState.sort = e.target.value;
-			renderProjects();
-		});
-	}
-
-	// Fetch repos if not cached
-	if (!_ghRepos) {
-		try {
-			_ghRepos = await ghFetch(`${GH_API}/repos?per_page=100&type=public`);
-		} catch (err) {
-			document.getElementById("projects-grid").innerHTML =
-				`<p class="no-results">Failed to load repositories. Please try again later.</p>`;
-			return;
-		}
-	}
-
-	// Filter out excluded repos
-	const repos = _ghRepos.filter((r) => !CONFIG.excludeRepos.includes(r.name));
-
-	// Fetch README for each repo to check SHOWCASE flag (in parallel, capped)
-	const withShowcase = await resolveShowcaseFlags(repos);
-	projectsState.repos = withShowcase;
-
-	// Populate language filter dropdown
-	populateLangFilter(withShowcase);
-
-	renderProjects();
 }
 
 /**
@@ -315,16 +327,27 @@ async function resolveShowcaseFlags(repos) {
 }
 
 function populateLangFilter(repos) {
-	const langSelect = document.getElementById("lang-filter");
-	if (!langSelect) return;
-	const langs = [
-		...new Set(repos.map((r) => r.language).filter(Boolean)),
-	].sort();
-	langs.forEach((lang) => {
+	const filter = document.getElementById("lang-filter");
+	if (!filter) return;
+
+	// Collect every unique language from every repository
+	const langSet = new Set();
+	repos.forEach((repo) => {
+		if (repo.all_languages) {
+			repo.all_languages.forEach((lang) => langSet.add(lang));
+		}
+	});
+
+	const sortedLangs = Array.from(langSet).sort();
+
+	// Clear existing options except the first one
+	filter.innerHTML = '<option value="">All Languages</option>';
+
+	sortedLangs.forEach((lang) => {
 		const opt = document.createElement("option");
 		opt.value = lang;
 		opt.textContent = lang;
-		langSelect.appendChild(opt);
+		filter.appendChild(opt);
 	});
 }
 

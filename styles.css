@@ -84,6 +84,75 @@ ul {
 	list-style: none;
 }
 
+body.light-mode {
+	--bg: #f5f7fa; /* Light gray-white */
+	--bg-surface: #ffffff; /* Pure white */
+	--bg-card: #e1e4e8; /* Light border/card color */
+	--bg-hover: #d1d5da;
+	--border: #d1d5da;
+	--border-light: #bcbfc4;
+}
+
+/* Optional: Style the toggle button */
+.theme-toggle {
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	cursor: pointer;
+	padding: 8px;
+	border-radius: 8px;
+	transition: var(--transition);
+}
+
+.theme-toggle-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	font: inherit; /* Inherits DM Mono from .nav-link */
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--text-primary);
+	position: relative;
+}
+
+.theme-toggle-btn::after {
+	content: "";
+	position: absolute;
+	bottom: -4px;
+	left: 0;
+	width: 0;
+	height: 1px;
+	background: var(--accent);
+	transition: width var(--transition);
+}
+
+.theme-toggle-btn:hover::after {
+	width: 100%;
+}
+
+.theme-toggle-btn:hover {
+	color: var(--accent);
+}
+
+body.light-mode .sun-icon {
+	display: none;
+}
+
+body:not(.light-mode) .moon-icon {
+	display: none;
+}
+
+.theme-toggle i {
+	transition: transform var(--transition);
+	width: 20px;
+	text-align: center;
+}
+
+.theme-toggle:hover i {
+	transform: rotate(15deg);
+}
+
 /* ─────────────────────────────────────────
    2. Typography
 ───────────────────────────────────────── */
