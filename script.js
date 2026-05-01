@@ -307,12 +307,7 @@ async function initProjects() {
 			(repo) => !CONFIG.excludeRepos.includes(repo.name),
 		);
 
-		// Use only the primary language GitHub already returns — no extra API calls
-		filteredRepos.forEach((repo) => {
-			repo.all_languages = repo.language ? [repo.language] : [];
-		});
-
-		// Fetch READMEs to resolve SHOWCASE flags (batched to respect rate limits)
+		// Fetch READMEs to resolve SHOWCASE flags and LANGUAGES tags (batched)
 		const withShowcase = await resolveShowcaseFlags(filteredRepos);
 
 		// Store in shared state so renderProjects() can read it
@@ -334,8 +329,9 @@ async function initProjects() {
 }
 
 /**
- * Fetch READMEs in parallel (batched) and resolve the SHOWCASE flag.
- * Returns array of { ...repo, isShowcase: bool, readmeContent: string|null }
+ * Fetch READMEs in parallel (batched) and resolve the SHOWCASE flag
+ * and LANGUAGES tag.
+ * Returns array of { ...repo, isShowcase: bool, all_languages: string[], readmeContent: string|null }
  */
 async function resolveShowcaseFlags(repos) {
 	const BATCH = 10; // max concurrent requests
@@ -350,11 +346,33 @@ async function resolveShowcaseFlags(repos) {
 						`https://api.github.com/repos/${CONFIG.username}/${repo.name}/readme`,
 					);
 					const text = decodeBase64(data.content);
+
+					// Parse <!-- SHOWCASE: true -->
 					const isShowcase = /<!--\s*SHOWCASE:\s*true\s*-->/i.test(text);
-					return { ...repo, isShowcase, readmeContent: text };
+
+					// Parse language badge: ![Language](https://img.shields.io/badge/language-Python%20%7C%20C%2B%2B-blue)
+					// Falls back to GitHub primary language if badge is absent
+					const badgeMatch = text.match(
+						/shields\.io\/badge\/language-(.+?)-blue/i,
+					);
+					const all_languages = badgeMatch
+						? decodeURIComponent(badgeMatch[1])
+								.split("|")
+								.map((l) => l.trim())
+								.filter(Boolean)
+						: repo.language
+							? [repo.language]
+							: [];
+
+					return { ...repo, isShowcase, all_languages, readmeContent: text };
 				} catch {
-					// No README or API error — not a showcase repo
-					return { ...repo, isShowcase: false, readmeContent: null };
+					// No README or API error
+					return {
+						...repo,
+						isShowcase: false,
+						all_languages: repo.language ? [repo.language] : [],
+						readmeContent: null,
+					};
 				}
 			}),
 		);
