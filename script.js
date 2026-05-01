@@ -387,26 +387,31 @@ function renderProjects() {
 
 	let repos = [...projectsState.repos];
 
-	// Apply showcase filter
+	// 1. Updated Showcase Filter
+	// Changed 'isShowcase' to 'is_showcase' to match the fetch logic
 	if (projectsState.filter === "showcase") {
-		repos = repos.filter((r) => r.isShowcase);
+		repos = repos.filter((r) => r.is_showcase);
 	}
 
-	// Apply search
+	// 2. Apply search
 	if (projectsState.search) {
+		const term = projectsState.search.toLowerCase();
 		repos = repos.filter(
 			(r) =>
-				r.name.toLowerCase().includes(projectsState.search) ||
-				(r.description || "").toLowerCase().includes(projectsState.search),
+				r.name.toLowerCase().includes(term) ||
+				(r.description || "").toLowerCase().includes(term),
 		);
 	}
 
-	// Apply language filter
+	// 3. Updated Language Filter
+	// NEW: Checks the entire array of languages instead of just the primary one
 	if (projectsState.lang) {
-		repos = repos.filter((r) => r.language === projectsState.lang);
+		repos = repos.filter(
+			(r) => r.all_languages && r.all_languages.includes(projectsState.lang),
+		);
 	}
 
-	// Apply sort
+	// 4. Apply sort
 	if (projectsState.sort === "updated") {
 		repos.sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at));
 	} else if (projectsState.sort === "stars") {
@@ -415,6 +420,7 @@ function renderProjects() {
 		repos.sort((a, b) => a.name.localeCompare(b.name));
 	}
 
+	// 5. Render Results
 	if (repos.length === 0) {
 		grid.innerHTML = `<p class="no-results">No projects match the current filters.</p>`;
 		return;
@@ -422,7 +428,7 @@ function renderProjects() {
 
 	grid.innerHTML = repos.map((repo) => buildProjectCard(repo)).join("");
 
-	// Attach click handlers for modal
+	// Re-attach modal handlers
 	grid.querySelectorAll(".project-card").forEach((card) => {
 		card.addEventListener("click", () => {
 			const name = card.dataset.repoName;
