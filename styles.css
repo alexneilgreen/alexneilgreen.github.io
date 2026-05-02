@@ -84,77 +84,6 @@ ul {
 	list-style: none;
 }
 
-body.light-mode {
-	--bg: #f5f7fa; /* Light gray-white */
-	--bg-surface: #ffffff; /* Pure white */
-	--bg-card: #e1e4e8; /* Light border/card color */
-	--bg-hover: #d1d5da;
-	--border: #d1d5da;
-	--border-light: #bcbfc4;
-
-	--text-primary: #1a1d23; /* Dark text for readability */
-}
-
-/* Optional: Style the toggle button */
-.theme-toggle {
-	background: var(--bg-card);
-	border: 1px solid var(--border);
-	cursor: pointer;
-	padding: 8px;
-	border-radius: 8px;
-	transition: var(--transition);
-}
-
-.theme-toggle-btn {
-	background: none;
-	border: none;
-	padding: 0;
-	font: inherit; /* Inherits DM Mono from .nav-link */
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	color: var(--text-primary);
-	position: relative;
-}
-
-.theme-toggle-btn::after {
-	content: "";
-	position: absolute;
-	bottom: -4px;
-	left: 0;
-	width: 0;
-	height: 1px;
-	background: var(--accent);
-	transition: width var(--transition);
-}
-
-.theme-toggle-btn:hover::after {
-	width: 100%;
-}
-
-.theme-toggle-btn:hover {
-	color: var(--accent);
-}
-
-body.light-mode .sun-icon {
-	display: none;
-}
-
-body:not(.light-mode) .moon-icon {
-	display: none;
-}
-
-.theme-toggle i {
-	transition: transform var(--transition);
-	width: 20px;
-	text-align: center;
-}
-
-.theme-toggle:hover i {
-	transform: rotate(15deg);
-}
-
 /* ─────────────────────────────────────────
    2. Typography
 ───────────────────────────────────────── */
@@ -919,6 +848,7 @@ em {
 
 .project-search,
 .lang-filter,
+.status-filter,
 .sort-select {
 	font-family: var(--font-mono);
 	font-size: 0.8rem;
@@ -932,6 +862,7 @@ em {
 }
 .project-search:focus,
 .lang-filter:focus,
+.status-filter:focus,
 .sort-select:focus {
 	border-color: var(--accent);
 }
@@ -940,6 +871,9 @@ em {
 	width: 200px;
 }
 .lang-filter {
+	min-width: 130px;
+}
+.status-filter {
 	min-width: 130px;
 }
 .sort-select {
@@ -1000,13 +934,34 @@ em {
 
 .showcase-badge {
 	font-size: 0.65rem;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--accent);
 	border: 1px solid var(--accent-dim);
 	padding: 2px 7px;
 	border-radius: 4px;
 	flex-shrink: 0;
+}
+
+.status-badge {
+	font-size: 0.65rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 2px 7px;
+	border-radius: 4px;
+	flex-shrink: 0;
+}
+.status-badge--complete {
+	color: #6db87b;
+	border: 1px solid #3d7a4a;
+}
+.status-badge--archived {
+	color: #8d9099;
+	border: 1px solid #464c58;
+}
+.status-badge--progress {
+	color: #d4a84b;
+	border: 1px solid #8a6a28;
 }
 
 .project-card-desc {
@@ -1019,9 +974,24 @@ em {
 .project-card-meta {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	justify-content: space-between;
+	gap: 8px;
 	flex-wrap: wrap;
 	margin-top: 4px;
+}
+
+.project-meta-left {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.project-meta-right {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
 }
 
 .project-meta-item {
@@ -1208,7 +1178,7 @@ em {
 		display: none;
 	}
 	.hero-stats {
-		grid-template-columns: 1fr;
+		grid-template-columns: repeat(2, 1fr);
 	}
 
 	.contact-grid {

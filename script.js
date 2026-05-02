@@ -195,6 +195,7 @@ function initThemeToggle() {
 // Cache so we don't refetch on re-visit
 let _ghUser = null;
 let _ghRepos = null;
+let _ghResolvedRepos = null; // populated by initProjects; used by home stat
 
 async function initHome() {
 	try {
@@ -216,7 +217,7 @@ async function initHome() {
 				user.bio ||
 				"Computer Engineer with a focus in Intelligent Systems & Machine Learning.";
 
-		// Stats
+		// Stats from repo list (no README fetch needed)
 		const visibleRepos = repos.filter(
 			(r) => !CONFIG.excludeRepos.includes(r.name),
 		);
@@ -224,14 +225,38 @@ async function initHome() {
 			(sum, r) => sum + r.stargazers_count,
 			0,
 		);
-		const langs = new Set(visibleRepos.map((r) => r.language).filter(Boolean));
+		const totalForks = visibleRepos.reduce((sum, r) => sum + r.forks_count, 0);
 
 		setStatIfExists("stat-repos", visibleRepos.length);
 		setStatIfExists("stat-stars", totalStars);
-		setStatIfExists("stat-langs", langs.size);
+		setStatIfExists("stat-forks", totalForks);
+
+		// Language count: use badge-parsed data if already cached from Projects,
+		// otherwise fall back to GitHub primary language count
+		updateLangStat();
 	} catch (err) {
 		console.error("Home init error:", err);
 	}
+}
+
+/**
+ * Update the language stat on the home page.
+ * Uses badge-parsed all_languages from resolved repos if available,
+ * otherwise falls back to GitHub primary language from _ghRepos.
+ */
+function updateLangStat() {
+	let langSet;
+	if (_ghResolvedRepos && _ghResolvedRepos.length > 0) {
+		langSet = new Set(_ghResolvedRepos.flatMap((r) => r.all_languages || []));
+	} else if (_ghRepos) {
+		const visible = _ghRepos.filter(
+			(r) => !CONFIG.excludeRepos.includes(r.name),
+		);
+		langSet = new Set(visible.map((r) => r.language).filter(Boolean));
+	} else {
+		return;
+	}
+	setStatIfExists("stat-langs", langSet.size);
 }
 
 function setStatIfExists(id, value) {
@@ -249,6 +274,7 @@ const projectsState = {
 	filter: "showcase", // 'showcase' | 'all'
 	search: "",
 	lang: "",
+	status: "", // 'Completed' | 'Archived' | 'In Progress' | ''
 	sort: "updated",
 };
 
@@ -271,6 +297,14 @@ function setupProjectListeners() {
 	if (langFilter) {
 		langFilter.addEventListener("change", () => {
 			projectsState.lang = langFilter.value;
+			renderProjects();
+		});
+	}
+
+	const statusFilter = document.getElementById("status-filter");
+	if (statusFilter) {
+		statusFilter.addEventListener("change", () => {
+			projectsState.status = statusFilter.value;
 			renderProjects();
 		});
 	}
@@ -313,6 +347,10 @@ async function initProjects() {
 		// Store in shared state so renderProjects() can read it
 		projectsState.repos = withShowcase;
 		projectsState.filter = "showcase";
+
+		// Cache resolved repos globally so home page lang stat can use them
+		_ghResolvedRepos = withShowcase;
+		updateLangStat();
 
 		// Populate language dropdown
 		populateLangFilter(withShowcase);
@@ -364,13 +402,36 @@ async function resolveShowcaseFlags(repos) {
 							? [repo.language]
 							: [];
 
-					return { ...repo, isShowcase, all_languages, readmeContent: text };
+					// Parse status badge: ![Status](https://img.shields.io/badge/status-complete-brightgreen)
+					const statusMatch = text.match(
+						/shields\.io\/badge\/status-([^-]+(?:-[^-]+)*?)-(brightgreen|lightgrey|yellow|red|blue)/i,
+					);
+					const rawStatus = statusMatch
+						? decodeURIComponent(statusMatch[1]).toLowerCase()
+						: "";
+					const status =
+						rawStatus === "complete"
+							? "Completed"
+							: rawStatus === "archived"
+								? "Archived"
+								: rawStatus.includes("progress")
+									? "In Progress"
+									: "";
+
+					return {
+						...repo,
+						isShowcase,
+						all_languages,
+						status,
+						readmeContent: text,
+					};
 				} catch {
 					// No README or API error
 					return {
 						...repo,
 						isShowcase: false,
 						all_languages: repo.language ? [repo.language] : [],
+						status: "",
 						readmeContent: null,
 					};
 				}
@@ -420,7 +481,12 @@ function renderProjects() {
 		repos = repos.filter((r) => r.isShowcase);
 	}
 
-	// 2. Apply search
+	// 2. Apply status filter
+	if (projectsState.status) {
+		repos = repos.filter((r) => r.status === projectsState.status);
+	}
+
+	// 3. Apply search
 	if (projectsState.search) {
 		const term = projectsState.search.toLowerCase();
 		repos = repos.filter(
@@ -430,15 +496,14 @@ function renderProjects() {
 		);
 	}
 
-	// 3. Updated Language Filter
-	// NEW: Checks the entire array of languages instead of just the primary one
+	// 4. Apply language filter
 	if (projectsState.lang) {
 		repos = repos.filter(
 			(r) => r.all_languages && r.all_languages.includes(projectsState.lang),
 		);
 	}
 
-	// 4. Apply sort
+	// 5. Apply sort
 	if (projectsState.sort === "updated") {
 		repos.sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at));
 	} else if (projectsState.sort === "stars") {
@@ -447,7 +512,7 @@ function renderProjects() {
 		repos.sort((a, b) => a.name.localeCompare(b.name));
 	}
 
-	// 5. Render Results
+	// 6. Render Results
 	if (repos.length === 0) {
 		grid.innerHTML = `<p class="no-results">No projects match the current filters.</p>`;
 		return;
@@ -482,8 +547,21 @@ function buildProjectCard(repo) {
 			? `<span class="project-meta-item">⑂ ${repo.forks_count}</span>`
 			: "";
 	const updated = `<span class="project-meta-item">↻ ${formatDate(repo.pushed_at)}</span>`;
-	const badge = repo.isShowcase
-		? `<span class="showcase-badge">Showcase</span>`
+
+	const showcaseBadge = repo.isShowcase
+		? `<span class="showcase-badge">★ Showcase</span>`
+		: "";
+
+	const statusClass =
+		repo.status === "Completed"
+			? "status-badge--complete"
+			: repo.status === "Archived"
+				? "status-badge--archived"
+				: repo.status === "In Progress"
+					? "status-badge--progress"
+					: "";
+	const statusBadge = repo.status
+		? `<span class="status-badge ${statusClass}">${escapeHtml(repo.status)}</span>`
 		: "";
 
 	// Escape readme content for safe storage in data attribute
@@ -498,11 +576,11 @@ function buildProjectCard(repo) {
          ${readmeAttr}>
       <div class="project-card-top">
         <span class="project-card-name">${escapeHtml(repo.name)}</span>
-        ${badge}
       </div>
       <p class="project-card-desc">${desc}</p>
       <div class="project-card-meta">
-        ${lang}${stars}${forks}${updated}
+        <div class="project-meta-left">${lang}${stars}${forks}${updated}</div>
+        <div class="project-meta-right">${statusBadge}${showcaseBadge}</div>
       </div>
     </div>`;
 }
