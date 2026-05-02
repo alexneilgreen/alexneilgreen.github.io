@@ -115,7 +115,7 @@ async function loadPage(page) {
 	// Run page-specific init
 	const inits = {
 		home: initHome,
-		about: null,
+		about: initAbout,
 		projects: initProjects,
 		contact: null,
 	};
@@ -262,6 +262,23 @@ function updateLangStat() {
 function setStatIfExists(id, value) {
 	const el = document.getElementById(id);
 	if (el) el.textContent = value;
+}
+
+/* ─────────────────────────────────────────
+   6. PAGE: About
+───────────────────────────────────────── */
+function initAbout() {
+	document.querySelectorAll(".skill-group--expandable").forEach((group) => {
+		const btn = group.querySelector(".skill-group-header");
+		if (!btn) return;
+
+		btn.addEventListener("click", () => {
+			const isOpen = group.classList.toggle("is-open");
+			btn.setAttribute("aria-expanded", isOpen);
+			const detail = group.querySelector(".skill-detail");
+			if (detail) detail.setAttribute("aria-hidden", !isOpen);
+		});
+	});
 }
 
 /* ─────────────────────────────────────────
