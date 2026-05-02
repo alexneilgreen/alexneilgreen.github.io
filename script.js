@@ -63,6 +63,21 @@ function formatDate(iso) {
 }
 
 /**
+ * Convert a season+year string to a sortable number.
+ * e.g. "Fall 2024" -> 20242, "Spring 2024" -> 20241, "Summer 2024" -> 20243
+ * Returns -1 for unrecognized values (sorts to end).
+ */
+function parseSemesterSort(str) {
+	if (!str) return -1;
+	const match = str.match(/(Spring|Summer|Fall|Winter)\s+(\d{4})/i);
+	if (!match) return -1;
+	const season = match[1].toLowerCase();
+	const year = parseInt(match[2], 10);
+	const order = { spring: 1, summer: 2, fall: 3, winter: 4 };
+	return year * 10 + (order[season] || 0);
+}
+
+/**
  * Naive debounce.
  */
 function debounce(fn, ms = 300) {
@@ -435,11 +450,26 @@ async function resolveShowcaseFlags(repos) {
 									? "In Progress"
 									: "";
 
+					// Parse ![Semester](...) or ![Timeline](...) badge
+					const semesterMatch = text.match(
+						/shields\.io\/badge\/(?:semester|timeline)-(.+?)-orange/i,
+					);
+					const semesterRaw = semesterMatch
+						? decodeURIComponent(semesterMatch[1]).trim()
+						: "";
+					// For multi-semester (e.g. "Fall 2023 / Spring 2024"), use the last one for sorting
+					const semesterParts = semesterRaw.split(/\s*\/\s*/);
+					const semesterSort = parseSemesterSort(
+						semesterParts[semesterParts.length - 1].trim(),
+					);
+
 					return {
 						...repo,
 						isShowcase,
 						all_languages,
 						status,
+						semesterRaw,
+						semesterSort,
 						readmeContent: text,
 					};
 				} catch {
@@ -449,6 +479,8 @@ async function resolveShowcaseFlags(repos) {
 						isShowcase: false,
 						all_languages: repo.language ? [repo.language] : [],
 						status: "",
+						semesterRaw: "",
+						semesterSort: -1,
 						readmeContent: null,
 					};
 				}
@@ -527,6 +559,21 @@ function renderProjects() {
 		repos.sort((a, b) => b.stargazers_count - a.stargazers_count);
 	} else if (projectsState.sort === "name") {
 		repos.sort((a, b) => a.name.localeCompare(b.name));
+	} else if (projectsState.sort === "chronological") {
+		repos.sort((a, b) => {
+			// Repos with no badge sort to end
+			const aSort = a.semesterSort ?? -1;
+			const bSort = b.semesterSort ?? -1;
+			if (aSort === -1 && bSort === -1) return a.name.localeCompare(b.name);
+			if (aSort === -1) return 1;
+			if (bSort === -1) return -1;
+			// Newer first
+			if (bSort !== aSort) return bSort - aSort;
+			// Same semester: showcase first
+			if (a.isShowcase !== b.isShowcase) return a.isShowcase ? -1 : 1;
+			// Then A-Z
+			return a.name.localeCompare(b.name);
+		});
 	}
 
 	// 6. Render Results
@@ -564,6 +611,9 @@ function buildProjectCard(repo) {
 			? `<span class="project-meta-item">⑂ ${repo.forks_count}</span>`
 			: "";
 	const updated = `<span class="project-meta-item">↻ ${formatDate(repo.pushed_at)}</span>`;
+	const semesterBadge = repo.semesterRaw
+		? `<span class="semester-badge">${escapeHtml(repo.semesterRaw)}</span>`
+		: "";
 
 	const showcaseBadge = repo.isShowcase
 		? `<span class="showcase-badge">★ Showcase</span>`
@@ -595,10 +645,10 @@ function buildProjectCard(repo) {
         <span class="project-card-name">${escapeHtml(repo.name)}</span>
       </div>
       <p class="project-card-desc">${desc}</p>
-      <div class="project-card-meta">
-        <div class="project-meta-left">${lang}${stars}${forks}${updated}</div>
-        <div class="project-meta-right">${statusBadge}${showcaseBadge}</div>
-      </div>
+        <div class="project-card-meta">
+          <div class="project-meta-left">${lang}${stars}${forks}${updated}</div>
+          <div class="project-meta-right">${statusBadge}${semesterBadge}${showcaseBadge}</div>
+        </div>
     </div>`;
 }
 

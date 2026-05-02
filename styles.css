@@ -1017,6 +1017,17 @@ em {
 	border: 1px solid #8a6a28;
 }
 
+.semester-badge {
+	font-size: 0.65rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #d4a84b;
+	border: 1px solid #8a6a28;
+	padding: 2px 7px;
+	border-radius: 4px;
+	flex-shrink: 0;
+}
+
 .project-card-desc {
 	font-size: 0.85rem;
 	color: var(--text-secondary);
@@ -1026,10 +1037,8 @@ em {
 
 .project-card-meta {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	flex-direction: column;
 	gap: 8px;
-	flex-wrap: wrap;
 	margin-top: 4px;
 }
 
@@ -1044,7 +1053,7 @@ em {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	flex-shrink: 0;
+	flex-wrap: wrap;
 }
 
 .project-meta-item {
