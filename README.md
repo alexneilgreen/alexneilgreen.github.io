@@ -2,7 +2,7 @@
 
 > Personal portfolio and resume site hosted via GitHub Pages, showcasing projects, skills, and experience with live README rendering from public repositories.
 
-![Status](https://img.shields.io/badge/status-active-brightgreen)
+![Status](https://img.shields.io/badge/status-Active-brightgreen)
 ![Language](https://img.shields.io/badge/language-HTML%20%7C%20CSS%20%7C%20JavaScript-blue)
 ![Timeline](https://img.shields.io/badge/timeline-Spring%202026-orange)
 
